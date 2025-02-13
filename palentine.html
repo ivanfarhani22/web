@@ -31,7 +31,7 @@
     .envelope {
         position: relative;
         width: 300px;
-        height: 150px;
+        height: 100px;
         background-color: #f08080;
     }
   
@@ -61,10 +61,14 @@
     }
 
     .card.animate {
-        animation: cardAnimation 3s ease forwards;
+        animation: openCard 3s ease forwards;
     }
 
-    @keyframes cardAnimation {
+    .card.animate-reverse {
+        animation: closeCard 3s ease forwards;
+    }
+
+    @keyframes openCard {
         0% {
             top: 5px;
             transform: rotateX(0) translateZ(0);
@@ -86,6 +90,30 @@
             z-index: 3;
         }
     }
+
+    @keyframes closeCard {
+        0% {
+            top: -150px;
+            transform: rotateX(-180deg) translateZ(150px);
+            z-index: 3;
+        }
+        40% {
+            top: -150px;
+            transform: rotateX(-180deg) translateZ(150px);
+            z-index: 3;
+        }
+        60% {
+            top: -150px;
+            transform: rotateX(0) translateZ(150px);
+            z-index: 1;
+        }
+        100% {
+            top: 5px;
+            transform: rotateX(0) translateZ(0);
+            z-index: 1;
+        }
+    }
+
   
     .card-front, .card-back {
         position: absolute;
@@ -304,28 +332,32 @@ $(document).ready(function() {
             isAnimating = true;
             const card = $(".card");
 
-            if (!card.hasClass('animate')) {
+            // Remove both classes first to reset animations
+            card.removeClass('animate animate-reverse');
+
+            // Add appropriate class based on current state
+            if (!isFlipped) {
                 card.addClass('animate');
                 isFlipped = true;
                 setTimeout(startHeartEffect, 1500);
-                playMusic(); // Play music when card opens
+                playMusic();
             } else {
-                card.removeClass('animate');
+                card.addClass('animate-reverse');
                 isFlipped = false;
                 stopHeartEffect();
-                stopMusic(); // Stop music when card closes
+                stopMusic();
             }
 
+            // Wait for animation to complete
             setTimeout(() => {
                 isAnimating = false;
-            }, 1500);
+            }, 3000); // Match this with animation duration
         }
     });
 
     // Initial click handler for first interaction
     window.addEventListener("click", function initAudio() {
         playMusic();
-        // Remove the event listener after first click
         window.removeEventListener("click", initAudio);
     });
 });
