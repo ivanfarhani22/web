@@ -257,6 +257,7 @@ $(document).ready(function() {
     let isAnimating = false;
     let isFlipped = false;
     let heartInterval;
+    const audio = document.getElementById("bg-music");
 
     function createHeart() {
         const heart = $('<div class="floating-heart">❤️</div>');
@@ -279,13 +280,23 @@ $(document).ready(function() {
 
     function startHeartEffect() {
         if (!heartInterval) {
-            heartInterval = setInterval(createHeart, 200); // Hati muncul setiap 0.5 detik
+            heartInterval = setInterval(createHeart, 200);
         }
     }
 
     function stopHeartEffect() {
         clearInterval(heartInterval);
         heartInterval = null;
+    }
+
+    function playMusic() {
+        audio.muted = false;
+        audio.play();
+    }
+
+    function stopMusic() {
+        audio.pause();
+        audio.currentTime = 0;
     }
 
     $(".container").click(function() {
@@ -296,12 +307,13 @@ $(document).ready(function() {
             if (!card.hasClass('animate')) {
                 card.addClass('animate');
                 isFlipped = true;
-
-                setTimeout(startHeartEffect, 1500); // Mulai efek hati setelah 1.5 detik
+                setTimeout(startHeartEffect, 1500);
+                playMusic(); // Play music when card opens
             } else {
                 card.removeClass('animate');
                 isFlipped = false;
-                stopHeartEffect(); // Hentikan efek hati jika kartu ditutup
+                stopHeartEffect();
+                stopMusic(); // Stop music when card closes
             }
 
             setTimeout(() => {
@@ -309,13 +321,14 @@ $(document).ready(function() {
             }, 1500);
         }
     });
-});
 
-        window.addEventListener("click", function() {
-    let audio = document.getElementById("bg-music");
-    audio.muted = false;
-    audio.play();
-  });
+    // Initial click handler for first interaction
+    window.addEventListener("click", function initAudio() {
+        playMusic();
+        // Remove the event listener after first click
+        window.removeEventListener("click", initAudio);
+    });
+});
     </script>
 </body>
 </html>
