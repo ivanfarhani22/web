@@ -282,6 +282,7 @@ body {
         flex-direction: column;
         height: auto;
         padding: 100px 5% 40px;
+        margin-bottom: 40px;
     }
     
     .hero-content {
@@ -313,9 +314,7 @@ body {
     }
     
     .hero-image {
-        width: 100%;
-        height: 300px;
-        margin-top: 30px;
+        display: none; /* Hide hero image on mobile */
     }
     
     /* Example Photos section mobile styles */
@@ -396,10 +395,6 @@ body {
     .button {
         width: 100%;
         text-align: center;
-    }
-    
-    .hero-image {
-        height: 250px;
     }
     
     .slide {
