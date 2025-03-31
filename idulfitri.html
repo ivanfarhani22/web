@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kartu Ucapan Idul Fitri</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Montserrat:wght@300;400;500;700&family=Raleway:wght@300;400;500;700&display=swap');
+        
+        :root {
+            --primary-color: #076b3a;
+            --secondary-color: #f8c86c;
+            --accent-color: #e3b04b;
+            --dark-color: #1a3b29;
+            --light-color: #f9f5ea;
+        }
+        
+        body {
+            font-family: 'Raleway', sans-serif;
+            background-color: var(--light-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+            padding: 1rem 0;
+        }
+        
+        .card-container {
+            width: 100%;
+            max-width: 480px;
+            margin: 1rem;
+            perspective: 2000px;
+        }
+        
+        .greeting-card {
+            position: relative;
+            transition: transform 1s ease;
+            transform-style: preserve-3d;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        
+        .card-front {
+            background: linear-gradient(to bottom, #ffffff, #f5f5f5);
+            transform: rotateY(0deg);
+            z-index: 2;
+        }
+        
+        .card-back {
+            background: linear-gradient(to bottom, #ffffff, #f5f5f5);
+            transform: rotateY(180deg);
+        }
+        
+        .card-content {
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            height: 100%;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .greeting-card.flipped {
+            transform: rotateY(180deg);
+        }
+        
+        .arabic-text {
+            font-family: 'Amiri', serif;
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+        
+        .greeting-title {
+            color: var(--primary-color);
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 0.8rem;
+            font-size: 1.8rem;
+        }
+        
+        .greeting-subtitle {
+            color: var(--dark-color);
+            text-align: center;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        
+        .ornament {
+            width: 100%;
+            height: 40px;
+            background: url('/api/placeholder/800/40') center/contain no-repeat;
+            margin: 1rem 0;
+            opacity: 0.8;
+        }
+        
+        .corner-decoration {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            opacity: 0.6;
+        }
+        
+        .top-left {
+            top: 10px;
+            left: 10px;
+            background: url('/api/placeholder/60/60') center/contain no-repeat;
+            transform: rotate(-45deg);
+        }
+        
+        .top-right {
+            top: 10px;
+            right: 10px;
+            background: url('/api/placeholder/60/60') center/contain no-repeat;
+            transform: rotate(45deg);
+        }
+        
+        .bottom-left {
+            bottom: 10px;
+            left: 10px;
+            background: url('/api/placeholder/60/60') center/contain no-repeat;
+            transform: rotate(-135deg);
+        }
+        
+        .bottom-right {
+            bottom: 10px;
+            right: 10px;
+            background: url('/api/placeholder/60/60') center/contain no-repeat;
+            transform: rotate(135deg);
+        }
+        
+        .btn-custom {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            font-size: 0.9rem;
+        }
+        
+        .btn-custom:hover {
+            background-color: var(--accent-color);
+            color: var(--dark-color);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .message-text {
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        
+        .ketupat {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: url('/api/placeholder/50/50') center/contain no-repeat;
+            z-index: 1;
+            animation: floating 4s ease-in-out infinite;
+        }
+        
+        .ketupat-1 {
+            top: 5%;
+            left: 5%;
+        }
+        
+        .ketupat-2 {
+            top: 15%;
+            right: 5%;
+            animation-delay: 0.5s;
+        }
+        
+        .ketupat-3 {
+            bottom: 10%;
+            left: 5%;
+            animation-delay: 1s;
+        }
+        
+        .ketupat-4 {
+            bottom: 8%;
+            right: 5%;
+            animation-delay: 1.5s;
+        }
+        
+        @keyframes floating {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
+        
+        .color-band {
+            position: absolute;
+            height: 6px;
+            width: 100%;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color), var(--primary-color));
+        }
+        
+        .top-band {
+            top: 0;
+            left: 0;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+        
+        .bottom-band {
+            bottom: 0;
+            left: 0;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+        }
+        
+        .signature {
+            font-style: italic;
+            margin-top: 1.5rem;
+            color: var(--primary-color);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        .social-icons {
+            margin-top: 1.5rem;
+        }
+        
+        .social-icon {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            margin: 0 0.3rem;
+            transition: transform 0.3s ease;
+            font-size: 1rem;
+        }
+        
+        .social-icon:hover {
+            transform: translateY(-5px);
+            background-color: var(--accent-color);
+            color: var(--dark-color);
+        }
+        
+        .crescent-moon {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            background: url('/api/placeholder/40/40') center/contain no-repeat;
+            animation: pulse 3s infinite ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.7; }
+        }
+        
+        /* Mobile Optimizations */
+        @media (max-width: 480px) {
+            body {
+                padding: 0.5rem 0;
+            }
+            
+            .card-container {
+                margin: 0.5rem;
+            }
+            
+            .arabic-text {
+                font-size: 1.5rem;
+            }
+            
+            .greeting-title {
+                font-size: 1.5rem;
+            }
+            
+            .greeting-subtitle {
+                font-size: 1rem;
+                margin-bottom: 0.7rem;
+            }
+            
+            .card-content {
+                padding: 1.5rem 1rem;
+            }
+            
+            .message-text {
+                font-size: 0.9rem;
+            }
+            
+            .corner-decoration {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .btn-custom {
+                padding: 0.6rem 1.2rem;
+                font-size: 0.85rem;
+            }
+            
+            .ornament {
+                height: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="confetti-container" id="confetti-container"></div>
+    
+    <!-- Decorative Elements -->
+    <div class="ketupat ketupat-1"></div>
+    <div class="ketupat ketupat-2"></div>
+    <div class="ketupat ketupat-3"></div>
+    <div class="ketupat ketupat-4"></div>
+    
+    <!-- Card Container -->
+    <div class="card-container">
+        <div class="greeting-card" id="greetingCard">
+            <!-- Front of Card -->
+            <div class="card-front">
+                <div class="color-band top-band"></div>
+                <div class="color-band bottom-band"></div>
+                
+                <div class="corner-decoration top-left"></div>
+                <div class="corner-decoration top-right"></div>
+                <div class="corner-decoration bottom-left"></div>
+                <div class="corner-decoration bottom-right"></div>
+                <div class="crescent-moon"></div>
+                
+                <div class="card-content">
+                    <div class="arabic-text">السلام عليكم ورحمة الله وبركاته</div>
+                    <div class="ornament"></div>
+                    <h1 class="greeting-title">Selamat Hari Raya Idul Fitri</h1>
+                    <h2 class="greeting-subtitle">1446 Hijriah</h2>
+                    <p class="message-text">Taqabbalallahu Minna Wa Minkum<br>Mohon Maaf Lahir dan Batin</p>
+                    <button class="btn btn-custom" id="flipBtn">
+                        <i class="fas fa-envelope-open me-2"></i> Buka Kartu
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Back of Card -->
+            <div class="card-back">
+                <div class="color-band top-band"></div>
+                <div class="color-band bottom-band"></div>
+                
+                <div class="corner-decoration top-left"></div>
+                <div class="corner-decoration top-right"></div>
+                <div class="corner-decoration bottom-left"></div>
+                <div class="corner-decoration bottom-right"></div>
+                
+                <div class="card-content">
+                    <h2 class="greeting-title">Selamat Hari Kemenangan</h2>
+                    <div class="ornament"></div>
+                    <p class="message-text">
+                        Di hari yang fitri ini, kami mengucapkan Selamat Hari Raya Idul Fitri. Semoga Allah SWT menerima semua amal ibadah kita selama bulan suci Ramadhan.
+                    </p>
+                    <p class="message-text">
+                        Hari Raya ini menjadi momen untuk kita saling memaafkan dan mempererat tali silaturahmi. Dengan kerendahan hati, kami memohon maaf atas segala khilaf dan salah.
+                    </p>
+                    <div class="signature">Ivan Farhani Ahmad & Sekeluarga</div>
+                    
+                    <div class="social-icons">
+                        <a href="https://www.facebook.com/ivan.farhani.7/" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://instagram.com/ivanfarhani" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="https://wa.me/62822472191252" class="social-icon"><i class="fab fa-whatsapp"></i></a>
+                        <a href="https://github.com/ivanfarhani22" class="social-icon"><i class="fab fa-github"></i></a>
+                    </div>
+                    
+                    <button class="btn btn-custom" id="closeBtn">
+                        <i class="fas fa-envelope me-2"></i> Tutup Kartu
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const card = document.getElementById('greetingCard');
+            const flipBtn = document.getElementById('flipBtn');
+            const closeBtn = document.getElementById('closeBtn');
+            
+            // Flip card functionality
+            flipBtn.addEventListener('click', function() {
+                card.classList.add('flipped');
+                createConfetti();
+            });
+            
+            closeBtn.addEventListener('click', function() {
+                card.classList.remove('flipped');
+            });
+            
+            // Make card responsive
+            const cardContainer = document.querySelector('.card-container');
+            const setCardHeight = () => {
+                const cardWidth = cardContainer.offsetWidth;
+                const cardHeight = cardWidth * 1.5; // Taller aspect ratio for mobile
+                card.style.height = `${cardHeight}px`;
+            };
+            
+            setCardHeight();
+            window.addEventListener('resize', setCardHeight);
+        });
+        
+        // Confetti Animation
+        function createConfetti() {
+            const confettiContainer = document.getElementById('confetti-container');
+            const colors = ['#076b3a', '#f8c86c', '#1a3b29', '#e3b04b', '#ffffff'];
+            
+            // Fewer confetti pieces for mobile to improve performance
+            const confettiCount = window.innerWidth < 480 ? 75 : 100;
+            
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                const size = Math.random() * 8 + 4; // Smaller confetti pieces
+                
+                confetti.style.width = `${size}px`;
+                confetti.style.height = `${size}px`;
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.position = 'absolute';
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.top = '-20px';
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                confetti.style.opacity = Math.random() + 0.5;
+                
+                const animationDuration = Math.random() * 2 + 1.5; // Shorter animation for mobile
+                confetti.style.animation = `fall ${animationDuration}s linear forwards`;
+                
+                confetti.style.setProperty('--fall-distance', `${window.innerHeight + 50}px`);
+                confetti.style.setProperty('--fall-delay', `${Math.random() * 1.5}s`);
+                
+                confettiContainer.appendChild(confetti);
+                
+                // Remove confetti after animation completes
+                setTimeout(() => {
+                    confetti.remove();
+                }, animationDuration * 1000 + 1500);
+            }
+        }
+        
+        // Fall animation for confetti
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fall {
+                0% {
+                    transform: translateY(0) rotate(0deg);
+                }
+                100% {
+                    transform: translateY(var(--fall-distance)) rotate(360deg);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
