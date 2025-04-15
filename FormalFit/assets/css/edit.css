@@ -1,0 +1,464 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #FFFFFF;
+  padding-top: 120px; /* Add padding to account for fixed navbar */
+}
+
+/* Navbar styles - keeping as is */
+.navbar {
+  width: 100%;
+  height: 120px;
+  background-color: #FAFAFA;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+}
+
+.logo {
+  width: 100px;
+  height: 100px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin-top: -15px;
+  position: relative;
+  top: 25px;
+}
+
+.logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.nav-menu {
+  display: flex;
+  justify-content: center;
+  gap: 100px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.nav-menu a {
+  text-decoration: none;
+  color: #000;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+}
+
+/* Warna saat di-hover */
+.nav-menu a:hover {
+  color: #7C6A46;
+}
+
+/* Warna saat link diklik */
+.nav-menu a:active {
+  color: #000;
+}
+
+/* Warna untuk link yang aktif (halaman sedang dibuka) */
+.nav-menu a.active {
+  color: #7C6A46;
+  font-weight: bold;
+}
+
+
+/* Main Content - Improved */
+.main-container {
+  display: flex;
+  flex-direction: row;
+  gap: 30px;
+  max-width: 1200px;
+  margin: 40px auto 0;
+  padding: 0 20px;
+  flex-wrap: wrap;
+}
+
+.image-upload-container {
+  flex: 1;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.image-upload-box {
+  height: auto;
+  min-height: 400px;
+  border: 2px dashed #8B7A56;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  background-color: #FAFAFA;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  padding: 20px;
+}
+
+#placeholderContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.placeholder-image {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 20px;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.placeholder-image svg {
+  width: 100%;
+  height: 100%;
+  stroke: #8B7A56;
+}
+
+.image-upload-box:hover {
+  border-color: #6a5c3f;
+  background-color: #f5f5f5;
+}
+
+.image-upload-box:hover .placeholder-image {
+  opacity: 0.8;
+}
+
+/* For when an image is uploaded */
+.user-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  position: relative;
+  z-index: 1;
+}
+
+/* For drag and drop functionality */
+.image-upload-box.dragging {
+  border-color: #8B7A56;
+  background-color: rgba(139, 122, 86, 0.1);
+  border-style: solid;
+}
+
+.upload-text {
+  font-size: 16px;
+  font-weight: 500;
+  font-family: 'Poppins', sans-serif;
+  text-align: center;
+  line-height: 1.5;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.upload-button {
+  background-color: #8B7A56; /* Changed to match footer color */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background-color 0.3s;
+}
+
+.upload-button:hover {
+  background-color: #7A6A46; /* Darker shade for hover */
+}
+
+.controls-container {
+  flex: 1;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  background-color: #FAFAFA; /* Match navbar color */
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.control-label {
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.slider-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  height: 40px;
+}
+
+.slider-arrow {
+  font-size: 18px;
+  color: #8B7A56; /* Match theme color */
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s;
+}
+
+.slider-arrow:hover {
+  color: #7A6A46; /* Darker shade for hover */
+}
+
+.slider {
+  flex: 1;
+  height: 8px;
+  background-color: #E5E5E5;
+  border-radius: 4px;
+  position: relative;
+  cursor: pointer;
+}
+
+.slider-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background-color: #8B7A56; /* Match theme color */
+  border-radius: 4px;
+  width: 50%;
+  transition: width 0.2s ease;
+}
+
+.slider-handle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border: 2px solid #8B7A56; /* Match theme color */
+  border-radius: 50%;
+  cursor: grab;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.slider-handle:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.slider-handle:active {
+  cursor: grabbing;
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.dropdown-select {
+  padding: 12px 16px;
+  border: 1px solid #E5E5E5;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+  background-color: white;
+  transition: border-color 0.2s;
+}
+
+.dropdown-select:hover {
+  border-color: #8B7A56; /* Match theme color */
+}
+
+.dropdown-text {
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  color: #333;
+}
+
+.dropdown-arrow {
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #8B7A56; /* Match theme color */
+  transition: transform 0.2s;
+}
+
+.dropdown-select.active .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.dropdown-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid #E5E5E5;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  z-index: 10;
+  display: none;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-options.show {
+  display: block;
+}
+
+.dropdown-option {
+  padding: 12px 16px;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+  color: #333;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.dropdown-option:hover {
+  background-color: rgba(139, 122, 86, 0.1); /* Match theme color with transparency */
+}
+
+.user-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  position: absolute;
+  transform-origin: center;
+  transition: transform 0.3s ease;
+}
+
+.outer-frame {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.7;
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+.file-input {
+  display: none;
+}
+
+/* Media Queries - Improved */
+@media screen and (max-width: 768px) {
+  .main-container {
+    flex-direction: column;
+    padding: 20px;
+    margin-top: 80px;
+    gap: 24px;
+  }
+  
+  .image-upload-box {
+    height: 300px;
+  }
+  
+  .controls-container {
+    width: 100%;
+  }
+  
+  .control-group {
+    gap: 10px;
+  }
+  
+  .slider-container {
+    height: 36px;
+  }
+  
+  .dropdown-select, .dropdown-option {
+    padding: 10px 14px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .image-upload-box {
+    height: 250px;
+  }
+  
+  .upload-text {
+    font-size: 14px;
+  }
+  
+  .upload-button {
+    padding: 10px 18px;
+    font-size: 14px;
+  }
+  
+  .controls-container {
+    padding: 16px;
+    gap: 18px;
+  }
+  
+  .control-label {
+    font-size: 12px;
+  }
+}
+
+/* Keep Footer as is */
+.footer {
+  background-color: #8B7A56;
+  color: #FFFFFF;
+  padding: 15px 0;
+  margin-top: 80px;
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.contact-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.left-column, .right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.contact-row div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer-bottom {
+  text-align: center;
+  margin-top: 10px;
+  padding-top: 10px;
+}
