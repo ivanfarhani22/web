@@ -168,11 +168,18 @@ body {
 
 .hero-image {
     width: 45%;
-    height: 514px;
+    height: auto;
     background-color: #FAFAFA;
-    background-size: cover;
-    background-position: center;
-    align-self: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-image img {
+    width: 100%;
+    height: auto;
+    max-height: 514px;
+    object-fit: contain;
 }
 
 /* Example Photos section */
