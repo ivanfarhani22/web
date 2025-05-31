@@ -1,381 +1,920 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // === Elements ===
-    const imageUploadBox = document.getElementById('imageUploadBox');
-    const fileInput = document.getElementById('fileInput');
-    const frameFileInput = document.getElementById('frameFileInput'); // New frame upload input
-    const placeholderContent = document.getElementById('placeholderContent');
-    const downloadButton = document.getElementById('downloadButton');
-    const outerTypeDropdown = document.getElementById('outerTypeDropdown');
-    const dropdownText = outerTypeDropdown.querySelector('.dropdown-text');
-    const dropdownOptions = outerTypeDropdown.querySelector('.dropdown-options');
-    const uploadFrameButton = document.getElementById('uploadFrameButton'); // New button for frame upload
-    const aspectRatioDropdown = document.getElementById('aspectRatioDropdown'); // Dropdown untuk skala
+/**
+ * Enhanced Image Editor with Frame Overlay
+ * Optimized for better maintainability and performance
+ */
 
-    // === State variables ===
-    let userImage = null;
-    let outerFrame = null;
-    let customFrameUploaded = false; // Flag to track if a custom frame was uploaded
-    let customFrameImage = null; // To store the custom frame image
-    let frameImages = {}; // Cache for preloaded frame images
-    let imageState = {
-        verticalPosition: 50,
-        horizontalPosition: 50,
-        zoom: 50,
-        outerType: 'none',
-        outerVerticalPosition: 50,
-        outerHorizontalPosition: 50,
-        outerZoom: 50,
-        imageAspectRatio: '1/1'  // Default aspect ratio 1:1 (format: 1/1 atau 3/4)
-    };
-
-    // === Frame data for demo ===
-    const frames = {
-        frame1: { src: 'assets/images/Jas 11.png', name: 'Jas 1' },
-        frame2: { src: 'assets/images/Jas 13.png', name: 'Jas 2' },
-        frame3: { src: 'assets/images/Model Jas 6.png', name: 'Jas 3' },
-        frame4: { src: 'assets/images/Model Jas 29.png', name: 'Jas 4' }
-    };
-
-    // === Upload frame (custom) ===
-    if (uploadFrameButton) {
-        uploadFrameButton.addEventListener('click', function() {
-            if (frameFileInput) {
-                frameFileInput.click();
-            }
-        });
-    }
-    if (frameFileInput) {
-        frameFileInput.addEventListener('change', function(e) {
-            handleFrameUpload(e.target.files[0]);
-        });
-    }
-    function handleFrameUpload(file) {
-        if (!file || !file.type.match('image.*')) {
-            alert('Silakan pilih file gambar yang valid untuk frame!');
-            return;
-        }
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            customFrameUploaded = true;
-            customFrameImage = new Image();
-            customFrameImage.crossOrigin = 'Anonymous';
-            customFrameImage.src = e.target.result;
-            if (dropdownText) {
-                dropdownText.textContent = 'Frame Kustom';
-            }
-            imageState.outerType = 'custom';
-            updateOuterFrame();
-            updateImageDisplay();
+class ImageEditor {
+    constructor() {
+        // DOM Elements
+        this.elements = {
+            imageUploadBox: document.getElementById('imageUploadBox'),
+            fileInput: document.getElementById('fileInput'),
+            frameFileInput: document.getElementById('frameFileInput'),
+            placeholderContent: document.getElementById('placeholderContent'),
+            downloadButton: document.getElementById('downloadButton'),
+            outerTypeDropdown: document.getElementById('outerTypeDropdown'),
+            uploadFrameButton: document.getElementById('uploadFrameButton'),
+            aspectRatioDropdown: document.getElementById('aspectRatioDropdown')
         };
-        reader.readAsDataURL(file);
+
+        // State management
+        this.state = {
+            userImage: null,
+            outerFrame: null,
+            customFrameImage: null,
+            customFrameUploaded: false,
+            frameImages: {},
+            frameDataUrls: {},
+            imageState: {
+                verticalPosition: 50,
+                horizontalPosition: 50,
+                zoom: 50,
+                outerType: 'none',
+                outerVerticalPosition: 50,
+                outerHorizontalPosition: 50,
+                outerZoom: 50,
+                imageAspectRatio: '1/1'
+            }
+        };
+
+        // Configuration
+        this.config = {
+            frames: {
+                frame1: { src: 'assets/images/Jas 11.png', name: 'Jas 1' },
+                frame2: { src: 'assets/images/Jas 13.png', name: 'Jas 2' },
+                frame3: { src: 'assets/images/Model Jas 6.png', name: 'Jas 3' },
+                frame4: { src: 'assets/images/Model Jas 29.png', name: 'Jas 4' }
+            },
+            aspectRatios: {
+                '1:1': { width: 400, height: 400 },
+                '3:4': { width: 300, height: 400 },
+                '4:3': { width: 400, height: 300 }
+            },
+            baseWidth: 400
+        };
+
+        this.init();
     }
 
-    // === Preload frame images ===
-    function preloadFrames() {
-        Object.keys(frames).forEach(key => {
-            const img = new Image();
-            img.crossOrigin = 'Anonymous';
-            const basePath = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
-            img.src = basePath + frames[key].src;
-            frameImages[key] = img;
-            img.onload = function() {
-                console.log(`Preloaded frame: ${key} - ${this.src}`);
-            };
-            img.onerror = function() {
-                console.error(`Failed to preload frame: ${key}`, this.src);
-            };
+    /**
+     * Initialize the application
+     */
+    async init() {
+        try {
+            await this.preloadFrames();
+            this.bindEvents();
+            this.initializeSliders();
+            this.markActiveNavLink();
+            
+            // Delayed frame accessibility test
+            setTimeout(() => this.testFrameImages(), 1000);
+            console.log('Image Editor initialized successfully');
+        } catch (error) {
+            console.error('Failed to initialize Image Editor:', error);
+        }
+    }
+
+    /**
+     * Bind all event listeners
+     */
+    bindEvents() {
+        // Image upload events
+        this.bindImageUploadEvents();
+        
+        // Frame upload events
+        this.bindFrameUploadEvents();
+        
+        // Dropdown events
+        this.bindDropdownEvents();
+        
+        // Download event
+        this.bindDownloadEvent();
+        
+        // Global click handler for dropdowns
+        document.addEventListener('click', (e) => this.handleGlobalClick(e));
+    }
+
+    /**
+     * Bind image upload related events
+     */
+    bindImageUploadEvents() {
+        const { imageUploadBox, fileInput } = this.elements;
+        
+        if (!imageUploadBox || !fileInput) return;
+
+        imageUploadBox.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => this.handleFileUpload(e.target.files[0]));
+        
+        // Drag and drop
+        imageUploadBox.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            imageUploadBox.classList.add('dragging');
+        });
+        
+        imageUploadBox.addEventListener('dragleave', () => {
+            imageUploadBox.classList.remove('dragging');
+        });
+        
+        imageUploadBox.addEventListener('drop', (e) => {
+            e.preventDefault();
+            imageUploadBox.classList.remove('dragging');
+            if (e.dataTransfer.files.length > 0) {
+                this.handleFileUpload(e.dataTransfer.files[0]);
+            }
         });
     }
-    preloadFrames();
 
-    // === File upload handling (click & drag-drop) ===
-    imageUploadBox.addEventListener('click', function() {
-        fileInput.click();
-    });
-    fileInput.addEventListener('change', function(e) {
-        handleFileUpload(e.target.files[0]);
-    });
-    imageUploadBox.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        imageUploadBox.classList.add('dragging');
-    });
-    imageUploadBox.addEventListener('dragleave', function() {
-        imageUploadBox.classList.remove('dragging');
-    });
-    imageUploadBox.addEventListener('drop', function(e) {
-        e.preventDefault();
-        imageUploadBox.classList.remove('dragging');
-        if (e.dataTransfer.files.length > 0) {
-            handleFileUpload(e.dataTransfer.files[0]);
+    /**
+     * Bind frame upload related events
+     */
+    bindFrameUploadEvents() {
+        const { uploadFrameButton, frameFileInput } = this.elements;
+        
+        if (uploadFrameButton) {
+            uploadFrameButton.addEventListener('click', () => {
+                if (frameFileInput) frameFileInput.click();
+            });
         }
-    });
-    function handleFileUpload(file) {
-        if (!file || !file.type.match('image.*')) {
-            alert('Silakan pilih file gambar yang valid!');
-            return;
+        
+        if (frameFileInput) {
+            frameFileInput.addEventListener('change', (e) => {
+                this.handleFrameUpload(e.target.files[0]);
+            });
         }
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            placeholderContent.style.display = 'none';
-            if (userImage) {
-                // Hapus userImage jika benar-benar merupakan child dari imageUploadBox
-                if (userImage.parentNode === imageUploadBox) {
-                    imageUploadBox.removeChild(userImage);
-                }
-            }
-            // Create and add new user image element
-            userImage = document.createElement('img');
-            userImage.className = 'user-image';
-            userImage.src = e.target.result;
-            imageUploadBox.appendChild(userImage);
-            updateOuterFrame();
-            updateImageDisplay();
-        };
-        reader.readAsDataURL(file);
     }
 
-    // === Dropdown handling for Outer Frame (predefined) ===
-    if (outerTypeDropdown) {
-        outerTypeDropdown.addEventListener('click', function(e) {
+    /**
+     * Bind dropdown events
+     */
+    bindDropdownEvents() {
+        this.bindOuterFrameDropdown();
+        this.bindAspectRatioDropdown();
+    }
+
+    /**
+     * Bind outer frame dropdown events
+     */
+    bindOuterFrameDropdown() {
+        const { outerTypeDropdown } = this.elements;
+        if (!outerTypeDropdown) return;
+
+        const dropdownText = outerTypeDropdown.querySelector('.dropdown-text');
+        const dropdownOptions = outerTypeDropdown.querySelector('.dropdown-options');
+        
+        outerTypeDropdown.addEventListener('click', (e) => {
             dropdownOptions.classList.toggle('show');
             e.stopPropagation();
         });
-        document.addEventListener('click', function(e) {
-            if (!outerTypeDropdown.contains(e.target)) {
-                dropdownOptions.classList.remove('show');
-            }
-        });
-        const dropdownOptionElements = document.querySelectorAll('.dropdown-option');
-        dropdownOptionElements.forEach(option => {
-            option.addEventListener('click', function() {
-                const value = this.getAttribute('data-value');
-                dropdownText.textContent = this.textContent;
-                imageState.outerType = value;
+
+        const options = outerTypeDropdown.querySelectorAll('.dropdown-option');
+        options.forEach(option => {
+            option.addEventListener('click', () => {
+                const value = option.getAttribute('data-value');
+                dropdownText.textContent = option.textContent;
+                this.state.imageState.outerType = value;
+                
                 if (value !== 'custom') {
-                    customFrameUploaded = false;
+                    this.state.customFrameUploaded = false;
                 }
-                updateOuterFrame();
-                updateImageDisplay();
+                
+                this.updateOuterFrame();
+                this.updateImageDisplay();
             });
         });
     }
 
-    // === Dropdown handling for Aspect Ratio (Skala Gambar) ===
-    if (aspectRatioDropdown) {
-        const aspectDropdownText = aspectRatioDropdown.querySelector('.dropdown-text');
-        const aspectDropdownOptions = aspectRatioDropdown.querySelector('.dropdown-options');
-        aspectRatioDropdown.addEventListener('click', function(e) {
-            aspectDropdownOptions.classList.toggle('show');
+    /**
+     * Bind aspect ratio dropdown events
+     */
+    bindAspectRatioDropdown() {
+        const { aspectRatioDropdown } = this.elements;
+        if (!aspectRatioDropdown) return;
+
+        const dropdownText = aspectRatioDropdown.querySelector('.dropdown-text');
+        const dropdownOptions = aspectRatioDropdown.querySelector('.dropdown-options');
+        
+        aspectRatioDropdown.addEventListener('click', (e) => {
+            dropdownOptions.classList.toggle('show');
             e.stopPropagation();
         });
-        document.addEventListener('click', function(e) {
-            if (!aspectRatioDropdown.contains(e.target)) {
-                aspectDropdownOptions.classList.remove('show');
-            }
-        });
-        const aspectOptions = aspectDropdownOptions.querySelectorAll('.dropdown-option');
-        aspectOptions.forEach(option => {
-            option.addEventListener('click', function() {
-                const ratioValue = this.getAttribute('data-value'); // Expected "3:4" or "1:1"
-                aspectDropdownText.textContent = this.textContent;
-                // Convert "3:4" to "3/4" to match proper CSS syntax for aspect-ratio.
-                imageState.imageAspectRatio = ratioValue.replace(':', '/');
-                updateImageDisplay();
+
+        const options = dropdownOptions.querySelectorAll('.dropdown-option');
+        options.forEach(option => {
+            option.addEventListener('click', () => {
+                const ratioValue = option.getAttribute('data-value');
+                dropdownText.textContent = option.textContent;
+                this.state.imageState.imageAspectRatio = ratioValue.replace(':', '/');
+                this.adjustImageBoxSize(ratioValue);
+                this.updateImageDisplay();
             });
         });
     }
 
-    // === Function to update outer frame ===
-    function updateOuterFrame() {
-        // Hanya menghapus outerFrame jika benar-benar merupakan child dari imageUploadBox
-        if (outerFrame && outerFrame.parentNode === imageUploadBox) {
-            imageUploadBox.removeChild(outerFrame);
-            outerFrame = null;
+    /**
+     * Bind download event
+     */
+    bindDownloadEvent() {
+        const { downloadButton } = this.elements;
+        if (!downloadButton) return;
+
+        downloadButton.addEventListener('click', () => this.handleDownload());
+    }
+
+    /**
+     * Handle global clicks for dropdown management
+     */
+    handleGlobalClick(e) {
+        const { outerTypeDropdown, aspectRatioDropdown } = this.elements;
+        
+        if (outerTypeDropdown && !outerTypeDropdown.contains(e.target)) {
+            const options = outerTypeDropdown.querySelector('.dropdown-options');
+            if (options) options.classList.remove('show');
         }
-        if (imageState.outerType === 'none' || !userImage) {
+        
+        if (aspectRatioDropdown && !aspectRatioDropdown.contains(e.target)) {
+            const options = aspectRatioDropdown.querySelector('.dropdown-options');
+            if (options) options.classList.remove('show');
+        }
+    }
+
+    /**
+     * Load image as data URL to prevent CORS issues
+     */
+    async loadImageAsDataURL(src) {
+        try {
+            const response = await fetch(src);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            
+            const blob = await response.blob();
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error('Failed to read file'));
+                reader.readAsDataURL(blob);
+            });
+        } catch (error) {
+            console.error('Failed to load image as data URL:', error);
+            return null;
+        }
+    }
+
+    /**
+     * Preload all frame images as data URLs
+     */
+    async preloadFrames() {
+        const basePath = this.getBasePath();
+        const loadPromises = [];
+
+        for (const [key, frame] of Object.entries(this.config.frames)) {
+            const promise = this.loadFrameImage(key, frame, basePath);
+            loadPromises.push(promise);
+        }
+
+        await Promise.allSettled(loadPromises);
+        console.log('Frame preloading completed');
+    }
+
+    /**
+     * Load individual frame image
+     */
+    async loadFrameImage(key, frame, basePath) {
+        try {
+            const fullPath = basePath + frame.src;
+            console.log(`Loading frame ${key} from:`, fullPath);
+            
+            const dataURL = await this.loadImageAsDataURL(fullPath);
+            if (dataURL) {
+                this.state.frameDataUrls[key] = dataURL;
+                
+                const img = new Image();
+                img.src = dataURL;
+                this.state.frameImages[key] = img;
+                
+                console.log(`Successfully loaded frame ${key}`);
+            } else {
+                throw new Error('Failed to convert to data URL');
+            }
+        } catch (error) {
+            console.error(`Error loading frame ${key}:`, error);
+        }
+    }
+
+    /**
+     * Get base path for assets
+     */
+    getBasePath() {
+        return window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+    }
+
+    /**
+     * Adjust image box size based on aspect ratio
+     */
+    adjustImageBoxSize(aspectRatio) {
+        const { imageUploadBox } = this.elements;
+        if (!imageUploadBox) return;
+
+        const config = this.config.aspectRatios[aspectRatio];
+        if (!config) {
+            console.warn(`Unknown aspect ratio: ${aspectRatio}`);
             return;
         }
-        outerFrame = document.createElement('img');
-        outerFrame.className = 'outer-frame';
-        if (customFrameUploaded && imageState.outerType === 'custom') {
-            if (customFrameImage) {
-                outerFrame.src = customFrameImage.src;
-                console.log("Using custom uploaded frame for display");
+
+        const { width, height } = config;
+        
+        imageUploadBox.style.width = `${width}px`;
+        imageUploadBox.style.height = `${height}px`;
+        imageUploadBox.style.transition = 'width 0.3s ease, height 0.3s ease';
+        
+        console.log(`Image box resized to: ${width}x${height} for ratio ${aspectRatio}`);
+    }
+
+    /**
+     * Validate uploaded file
+     */
+    validateImageFile(file, type = 'image') {
+        if (!file) {
+            this.showError(`Silakan pilih file ${type} yang valid!`);
+            return false;
+        }
+        
+        if (!file.type.match('image.*')) {
+            this.showError(`Silakan pilih file ${type} yang valid!`);
+            return false;
+        }
+        
+        return true;
+    }
+
+    /**
+     * Handle main image file upload
+     */
+    handleFileUpload(file) {
+        if (!this.validateImageFile(file)) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            this.setUserImage(e.target.result);
+        };
+        reader.onerror = () => {
+            this.showError('Gagal membaca file gambar');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    /**
+     * Set user image
+     */
+    setUserImage(src) {
+        const { imageUploadBox, placeholderContent } = this.elements;
+        
+        // Hide placeholder
+        if (placeholderContent) {
+            placeholderContent.style.display = 'none';
+        }
+        
+        // Remove existing image
+        if (this.state.userImage && this.state.userImage.parentNode === imageUploadBox) {
+            imageUploadBox.removeChild(this.state.userImage);
+        }
+        
+        // Create new image
+        this.state.userImage = document.createElement('img');
+        this.state.userImage.className = 'user-image';
+        this.state.userImage.src = src;
+        
+        imageUploadBox.appendChild(this.state.userImage);
+        
+        this.updateOuterFrame();
+        this.updateImageDisplay();
+    }
+
+    /**
+     * Handle frame upload
+     */
+    handleFrameUpload(file) {
+        if (!this.validateImageFile(file, 'frame')) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            this.setCustomFrame(e.target.result);
+        };
+        reader.onerror = () => {
+            this.showError('Gagal membaca file frame');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    /**
+     * Set custom frame
+     */
+    setCustomFrame(src) {
+        const { outerTypeDropdown } = this.elements;
+        
+        this.state.customFrameUploaded = true;
+        this.state.customFrameImage = new Image();
+        this.state.customFrameImage.src = src;
+        
+        const dropdownText = outerTypeDropdown?.querySelector('.dropdown-text');
+        if (dropdownText) {
+            dropdownText.textContent = 'Frame Kustom';
+        }
+        
+        this.state.imageState.outerType = 'custom';
+        this.updateOuterFrame();
+        this.updateImageDisplay();
+    }
+
+    /**
+     * Update outer frame display
+     */
+    updateOuterFrame() {
+        const { imageUploadBox } = this.elements;
+        const { outerType } = this.state.imageState;
+        
+        // Remove existing frame
+        if (this.state.outerFrame && this.state.outerFrame.parentNode === imageUploadBox) {
+            imageUploadBox.removeChild(this.state.outerFrame);
+            this.state.outerFrame = null;
+        }
+        
+        // Return if no frame needed or no user image
+        if (outerType === 'none' || !this.state.userImage) {
+            return;
+        }
+        
+        // Create new frame
+        this.state.outerFrame = document.createElement('img');
+        this.state.outerFrame.className = 'outer-frame';
+        
+        // Set frame source
+        if (this.state.customFrameUploaded && outerType === 'custom') {
+            if (this.state.customFrameImage) {
+                this.state.outerFrame.src = this.state.customFrameImage.src;
+                console.log("Using custom uploaded frame");
             } else {
                 console.error("Custom frame not found");
                 return;
             }
         } else {
-            if (!frames[imageState.outerType]) {
-                console.error("Frame not found:", imageState.outerType);
+            if (!this.config.frames[outerType]) {
+                console.error("Frame not found:", outerType);
                 return;
             }
-            if (frameImages[imageState.outerType] && frameImages[imageState.outerType].complete) {
-                outerFrame.src = frameImages[imageState.outerType].src;
-                console.log("Using preloaded frame for display:", imageState.outerType);
-            } else {
-                const basePath = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
-                outerFrame.src = basePath + frames[imageState.outerType].src;
-                console.log("Loading frame for display:", basePath + frames[imageState.outerType].src);
-            }
+            
+            // Use data URL if available, otherwise fallback to original path
+            const src = this.state.frameDataUrls[outerType] || 
+                       (this.getBasePath() + this.config.frames[outerType].src);
+            
+            this.state.outerFrame.src = src;
+            console.log("Using frame:", outerType);
         }
-        imageUploadBox.appendChild(outerFrame);
-        outerFrame.onload = function() {
-            console.log("Frame loaded for display:", imageState.outerType);
+        
+        // Add frame to container
+        imageUploadBox.appendChild(this.state.outerFrame);
+        
+        // Set up event handlers
+        this.state.outerFrame.onload = () => {
+            console.log("Frame loaded successfully:", outerType);
         };
-        outerFrame.onerror = function() {
-            console.error("Failed to load frame for display:", imageState.outerType);
+        
+        this.state.outerFrame.onerror = () => {
+            console.error("Failed to load frame:", outerType);
         };
     }
 
-    // === Function to update image display based on state ===
-    function updateImageDisplay() {
-        if (!userImage) return;
-        // Apply transformations to the user image
+    /**
+     * Update image display with transformations
+     */
+    updateImageDisplay() {
+        if (!this.state.userImage) return;
+
+        const { imageState } = this.state;
+        
+        // Calculate user image transformations
         const xPos = (imageState.horizontalPosition - 50) / 50 * 100;
         const yPos = (imageState.verticalPosition - 50) / 50 * 100;
         const scale = 0.5 + (imageState.zoom / 100);
-        userImage.style.transform = `translate(${xPos}%, ${yPos}%) scale(${scale})`;
-        // Apply aspect ratio (scale) settings
+        
+        // Apply transformations to user image
+        this.state.userImage.style.transform = `translate(${xPos}%, ${yPos}%) scale(${scale})`;
+        
         if (imageState.imageAspectRatio) {
-            userImage.style.objectFit = "cover";
-            userImage.style.aspectRatio = imageState.imageAspectRatio;
+            this.state.userImage.style.objectFit = "cover";
+            this.state.userImage.style.aspectRatio = imageState.imageAspectRatio;
         }
-        // Update outer frame transformation if exists
-        if (outerFrame) {
+        
+        // Update frame if present
+        if (this.state.outerFrame) {
             const frameXPos = (imageState.outerHorizontalPosition - 50) / 50 * 100;
             const frameYPos = (imageState.outerVerticalPosition - 50) / 50 * 100;
             const frameScale = 0.5 + (imageState.outerZoom / 100);
-            outerFrame.style.transform = `translate(${frameXPos}%, ${frameYPos}%) scale(${frameScale})`;
-            outerFrame.style.zIndex = "100";
-            outerFrame.style.opacity = "1";
+            
+            this.state.outerFrame.style.transform = `translate(${frameXPos}%, ${frameYPos}%) scale(${frameScale})`;
+            this.state.outerFrame.style.zIndex = "100";
+            this.state.outerFrame.style.opacity = "1";
         }
     }
 
-    // === Download functionality ===
-    downloadButton.addEventListener('click', function() {
-        if (!userImage) {
-            alert('Anda harus mengupload gambar terlebih dahulu!');
+    /**
+     * Render current state to canvas for download
+     */
+    async renderToCanvas() {
+        return new Promise((resolve, reject) => {
+            const { imageUploadBox } = this.elements;
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set high-resolution canvas
+            const rect = imageUploadBox.getBoundingClientRect();
+            const scale = 2; // Higher resolution
+            canvas.width = rect.width * scale;
+            canvas.height = rect.height * scale;
+            ctx.scale(scale, scale);
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const imagesToLoad = [];
+            
+            // Add user image
+            if (this.state.userImage) {
+                imagesToLoad.push({
+                    type: 'user',
+                    src: this.state.userImage.src
+                });
+            }
+            
+            // Add frame
+            if (this.state.outerFrame) {
+                imagesToLoad.push({
+                    type: 'frame',
+                    src: this.state.outerFrame.src
+                });
+            }
+            
+            if (imagesToLoad.length === 0) {
+                reject(new Error('No images to render'));
+                return;
+            }
+            
+            let loadedCount = 0;
+            const images = {};
+            
+            // Load all images
+            imagesToLoad.forEach(({ type, src }) => {
+                const img = new Image();
+                img.onload = () => {
+                    images[type] = img;
+                    loadedCount++;
+                    
+                    if (loadedCount === imagesToLoad.length) {
+                        this.drawToCanvas(ctx, rect, images);
+                        resolve(canvas);
+                    }
+                };
+                img.onerror = () => {
+                    console.error(`Failed to load ${type} image for rendering`);
+                    loadedCount++;
+                    
+                    if (loadedCount === imagesToLoad.length) {
+                        this.drawToCanvas(ctx, rect, images);
+                        resolve(canvas);
+                    }
+                };
+                img.src = src;
+            });
+        });
+    }
+
+    /**
+     * Draw images to canvas with proper transformations
+     */
+    drawToCanvas(ctx, rect, images) {
+        const { imageState } = this.state;
+        
+        // Draw user image
+        if (images.user) {
+            ctx.save();
+            this.applyTransformations(ctx, rect, {
+                xPos: (imageState.horizontalPosition - 50) / 50 * 100,
+                yPos: (imageState.verticalPosition - 50) / 50 * 100,
+                scale: 0.5 + (imageState.zoom / 100)
+            });
+            
+            this.drawImageWithAspectRatio(ctx, images.user, rect, imageState.imageAspectRatio);
+            ctx.restore();
+        }
+        
+        // Draw frame
+        if (images.frame) {
+            ctx.save();
+            this.applyTransformations(ctx, rect, {
+                xPos: (imageState.outerHorizontalPosition - 50) / 50 * 100,
+                yPos: (imageState.outerVerticalPosition - 50) / 50 * 100,
+                scale: 0.5 + (imageState.outerZoom / 100)
+            });
+            
+            ctx.drawImage(images.frame, 0, 0, rect.width, rect.height);
+            ctx.restore();
+        }
+    }
+
+    /**
+     * Apply transformations to canvas context
+     */
+    applyTransformations(ctx, rect, { xPos, yPos, scale }) {
+        ctx.translate(rect.width / 2, rect.height / 2);
+        ctx.translate(xPos * rect.width / 100, yPos * rect.height / 100);
+        ctx.scale(scale, scale);
+        ctx.translate(-rect.width / 2, -rect.height / 2);
+    }
+
+    /**
+     * Draw image with aspect ratio consideration
+     */
+    drawImageWithAspectRatio(ctx, image, rect, aspectRatio) {
+        if (!aspectRatio) {
+            ctx.drawImage(image, 0, 0, rect.width, rect.height);
             return;
         }
-        html2canvas(imageUploadBox).then(canvas => {
-            try {
-                const dataURL = canvas.toDataURL('image/png');
+        
+        const [ratioW, ratioH] = aspectRatio.split('/').map(Number);
+        const targetAspectRatio = ratioW / ratioH;
+        const boxAspectRatio = rect.width / rect.height;
+        
+        let drawWidth = rect.width;
+        let drawHeight = rect.height;
+        let drawX = 0;
+        let drawY = 0;
+        
+        if (targetAspectRatio > boxAspectRatio) {
+            drawHeight = rect.width / targetAspectRatio;
+            drawY = (rect.height - drawHeight) / 2;
+        } else {
+            drawWidth = rect.height * targetAspectRatio;
+            drawX = (rect.width - drawWidth) / 2;
+        }
+        
+        ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
+    }
+
+    /**
+     * Handle download functionality
+     */
+    async handleDownload() {
+        if (!this.state.userImage) {
+            this.showError('Anda harus mengupload gambar terlebih dahulu!');
+            return;
+        }
+
+        const { downloadButton } = this.elements;
+        const originalText = downloadButton.textContent;
+        
+        this.setDownloadState(true, 'Memproses...');
+
+        try {
+            console.log('Starting canvas rendering...');
+            const canvas = await this.renderToCanvas();
+            await this.downloadCanvas(canvas);
+            console.log('Download completed successfully');
+        } catch (error) {
+            console.error("Custom rendering failed, trying html2canvas:", error);
+            await this.fallbackDownload();
+        } finally {
+            this.setDownloadState(false, originalText);
+        }
+    }
+
+    /**
+     * Set download button state
+     */
+    setDownloadState(disabled, text) {
+        const { downloadButton } = this.elements;
+        if (downloadButton) {
+            downloadButton.disabled = disabled;
+            downloadButton.textContent = text;
+        }
+    }
+
+    /**
+     * Download canvas as image
+     */
+    async downloadCanvas(canvas) {
+        return new Promise((resolve, reject) => {
+            canvas.toBlob((blob) => {
+                if (!blob) {
+                    reject(new Error('Failed to create blob from canvas'));
+                    return;
+                }
+                
+                const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
-                link.download = 'edited-image-' + new Date().getTime() + '.png';
-                link.href = dataURL;
+                link.download = `edited-image-${Date.now()}.png`;
+                link.href = url;
+                
                 document.body.appendChild(link);
                 link.click();
+                
+                // Cleanup
                 setTimeout(() => {
                     document.body.removeChild(link);
-                    URL.revokeObjectURL(dataURL);
+                    URL.revokeObjectURL(url);
+                    resolve();
                 }, 100);
-            } catch (e) {
-                console.error("Download gagal:", e);
-                alert('Gagal mendownload gambar. Silakan coba lagi.');
-            }
-        }).catch(error => {
-            console.error("html2canvas error:", error);
-            alert('Gagal menangkap tampilan. Silakan coba lagi.');
-        });
-    });
-    
-    
-    // === Initialize slider controls ===
-    function initializeSliders() {
-        const sliders = document.querySelectorAll('.slider');
-        sliders.forEach(slider => {
-            const control = slider.getAttribute('data-control');
-            const handle = slider.querySelector('.slider-handle');
-            const fill = slider.querySelector('.slider-fill');
-            updateSliderUI(slider, imageState[control]);
-            handle.addEventListener('mousedown', function(e) {
-                e.preventDefault();
-                const sliderRect = slider.getBoundingClientRect();
-                const sliderWidth = sliderRect.width;
-                function handleMouseMove(e) {
-                    const relativeX = Math.max(0, Math.min(e.clientX - sliderRect.left, sliderWidth));
-                    const value = Math.round((relativeX / sliderWidth) * 100);
-                    imageState[control] = value;
-                    updateSliderUI(slider, value);
-                    updateImageDisplay();
-                }
-                function handleMouseUp() {
-                    document.removeEventListener('mousemove', handleMouseMove);
-                    document.removeEventListener('mouseup', handleMouseUp);
-                }
-                document.addEventListener('mousemove', handleMouseMove);
-                document.addEventListener('mouseup', handleMouseUp);
-            });
-            slider.addEventListener('click', function(e) {
-                if (e.target === handle) return;
-                const sliderRect = slider.getBoundingClientRect();
-                const relativeX = e.clientX - sliderRect.left;
-                const value = Math.round((relativeX / sliderRect.width) * 100);
-                imageState[control] = value;
-                updateSliderUI(slider, value);
-                updateImageDisplay();
-            });
-            const decreaseArrow = slider.parentElement.querySelector('.decrease');
-            const increaseArrow = slider.parentElement.querySelector('.increase');
-            if (decreaseArrow) {
-                decreaseArrow.addEventListener('click', function() {
-                    const value = Math.max(0, imageState[control] - 5);
-                    imageState[control] = value;
-                    updateSliderUI(slider, value);
-                    updateImageDisplay();
-                });
-            }
-            if (increaseArrow) {
-                increaseArrow.addEventListener('click', function() {
-                    const value = Math.min(100, imageState[control] + 5);
-                    imageState[control] = value;
-                    updateSliderUI(slider, value);
-                    updateImageDisplay();
-                });
-            }
+            }, 'image/png');
         });
     }
-    function updateSliderUI(slider, value) {
+
+    /**
+     * Fallback download using html2canvas
+     */
+    async fallbackDownload() {
+        try {
+            if (typeof html2canvas === 'undefined') {
+                throw new Error('html2canvas not available');
+            }
+            
+            const canvas = await html2canvas(this.elements.imageUploadBox, {
+                allowTaint: true,
+                useCORS: false,
+                scale: 2,
+                backgroundColor: null,
+                logging: false
+            });
+            
+            await this.downloadCanvas(canvas);
+        } catch (error) {
+            console.error("Fallback download failed:", error);
+            this.showError('Gagal mendownload gambar. Pastikan Anda menjalankan aplikasi melalui web server.');
+        }
+    }
+
+    /**
+     * Initialize slider controls
+     */
+    initializeSliders() {
+        const sliders = document.querySelectorAll('.slider');
+        sliders.forEach(slider => this.initializeSlider(slider));
+    }
+
+    /**
+     * Initialize individual slider
+     */
+    initializeSlider(slider) {
+        const control = slider.getAttribute('data-control');
+        if (!control || !(control in this.state.imageState)) {
+            console.warn(`Invalid slider control: ${control}`);
+            return;
+        }
+
         const handle = slider.querySelector('.slider-handle');
         const fill = slider.querySelector('.slider-fill');
-        handle.style.left = `${value}%`;
-        fill.style.width = `${value}%`;
-    }
-    initializeSliders();
-
-    // === Mark active nav link ===
-    let links = document.querySelectorAll("a");
-    links.forEach(link => {
-        if (link.href === window.location.href) {
-            link.classList.add("active");
+        
+        if (!handle || !fill) {
+            console.warn('Slider missing required elements');
+            return;
         }
-    });
 
-    // (Optional) Function to test frame image accessibility
-    function testFrameImages() {
+        // Initialize UI
+        this.updateSliderUI(slider, this.state.imageState[control]);
+
+        // Mouse events
+        this.bindSliderEvents(slider, control);
+        
+        // Arrow button events
+        this.bindSliderArrows(slider, control);
+    }
+
+    /**
+     * Bind slider drag events
+     */
+    bindSliderEvents(slider, control) {
+        const handle = slider.querySelector('.slider-handle');
+        
+        handle.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            const rect = slider.getBoundingClientRect();
+            
+            const handleMouseMove = (e) => {
+                const relativeX = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+                const value = Math.round((relativeX / rect.width) * 100);
+                this.updateSliderValue(slider, control, value);
+            };
+            
+            const handleMouseUp = () => {
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+            };
+            
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+        });
+
+        // Click to position
+        slider.addEventListener('click', (e) => {
+            if (e.target === handle) return;
+            
+            const rect = slider.getBoundingClientRect();
+            const relativeX = e.clientX - rect.left;
+            const value = Math.round((relativeX / rect.width) * 100);
+            this.updateSliderValue(slider, control, value);
+        });
+    }
+
+    /**
+     * Bind slider arrow button events
+     */
+    bindSliderArrows(slider, control) {
+        const container = slider.parentElement;
+        const decreaseArrow = container.querySelector('.decrease');
+        const increaseArrow = container.querySelector('.increase');
+        
+        if (decreaseArrow) {
+            decreaseArrow.addEventListener('click', () => {
+                const currentValue = this.state.imageState[control];
+                const newValue = Math.max(0, currentValue - 5);
+                this.updateSliderValue(slider, control, newValue);
+            });
+        }
+        
+        if (increaseArrow) {
+            increaseArrow.addEventListener('click', () => {
+                const currentValue = this.state.imageState[control];
+                const newValue = Math.min(100, currentValue + 5);
+                this.updateSliderValue(slider, control, newValue);
+            });
+        }
+    }
+
+    /**
+     * Update slider value and state
+     */
+    updateSliderValue(slider, control, value) {
+        this.state.imageState[control] = value;
+        this.updateSliderUI(slider, value);
+        this.updateImageDisplay();
+    }
+
+    /**
+     * Update slider UI elements
+     */
+    updateSliderUI(slider, value) {
+        const handle = slider.querySelector('.slider-handle');
+        const fill = slider.querySelector('.slider-fill');
+        
+        if (handle) handle.style.left = `${value}%`;
+        if (fill) fill.style.width = `${value}%`;
+    }
+
+    /**
+     * Mark active navigation link
+     */
+    markActiveNavLink() {
+        const links = document.querySelectorAll("a");
+        links.forEach(link => {
+            if (link.href === window.location.href) {
+                link.classList.add("active");
+            }
+        });
+    }
+
+    /**
+     * Test frame image accessibility
+     */
+    testFrameImages() {
         console.log("Testing frame image accessibility...");
-        Object.keys(frames).forEach(key => {
-            const basePath = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
-            const frameSrc = basePath + frames[key].src;
+        const basePath = this.getBasePath();
+        
+        Object.entries(this.config.frames).forEach(([key, frame]) => {
+            const frameSrc = basePath + frame.src;
             fetch(frameSrc)
                 .then(response => {
-                    if (response.ok) {
-                        console.log(`Frame ${key} is accessible`);
-                    } else {
-                        console.error(`Frame ${key} returned status: ${response.status}`);
-                    }
+                    const status = response.ok ? 'accessible' : `error ${response.status}`;
+                    console.log(`Frame ${key}: ${status}`);
                 })
                 .catch(error => {
-                    console.error(`Error fetching frame ${key}:`, error);
+                    console.error(`Frame ${key} fetch error:`, error.message);
                 });
         });
     }
-    setTimeout(testFrameImages, 1000);
+
+    /**
+     * Show error message to user
+     */
+    showError(message) {
+        alert(message);
+        console.error(message);
+    }
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    window.imageEditor = new ImageEditor();
 });
 
+// Duplicate navigation link marking (for compatibility)
 document.addEventListener("DOMContentLoaded", function() {
-    let links = document.querySelectorAll("a");
+    const links = document.querySelectorAll("a");
     links.forEach(link => {
         if (link.href === window.location.href) {
             link.classList.add("active");
