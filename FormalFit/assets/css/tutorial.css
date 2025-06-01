@@ -1,0 +1,527 @@
+/* ===========================================
+   RESET & BASE STYLES
+   =========================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #FFFFFF;
+  line-height: 1.6;
+  color: #333;
+}
+
+/* ===========================================
+   NAVBAR STYLES
+   =========================================== */
+.navbar {
+  width: 100%;
+  height: 120px;
+  background-color: #FAFAFA;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+  width: 100px;
+  height: 100px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin-top: -15px;
+  position: relative;
+  top: 25px;
+}
+
+.logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.nav-links {
+  display: flex;
+  justify-content: center;
+  gap: 100px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #000;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+.nav-links a:hover {
+  color: #7C6A46;
+}
+
+.nav-links a:active {
+  color: #000;
+}
+
+.nav-links a.active {
+  color: #7C6A46;
+  font-weight: bold;
+}
+
+/* Hamburger menu for mobile */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.hamburger span {
+  width: 25px;
+  height: 3px;
+  background-color: #000;
+  margin: 3px 0;
+  transition: 0.3s;
+}
+
+.hamburger.active span:nth-child(1) {
+  transform: rotate(-45deg) translate(-5px, 6px);
+}
+
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+  transform: rotate(45deg) translate(-5px, -6px);
+}
+
+/* Mobile menu */
+.mobile-menu {
+  display: none;
+  position: fixed;
+  top: 120px;
+  left: 0;
+  width: 100%;
+  background-color: #FAFAFA;
+  border-top: 1px solid #E5E5E5;
+  z-index: 9998;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.mobile-menu.active {
+  max-height: 300px;
+}
+
+.mobile-menu a {
+  display: block;
+  padding: 15px 20px;
+  text-decoration: none;
+  color: #000;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  border-bottom: 1px solid #E5E5E5;
+  transition: background-color 0.3s;
+}
+
+.mobile-menu a:hover {
+  background-color: rgba(124, 106, 70, 0.1);
+  color: #7C6A46;
+}
+
+.mobile-menu a.active {
+  color: #7C6A46;
+  font-weight: bold;
+  background-color: rgba(124, 106, 70, 0.1);
+}
+
+/* ===========================================
+   MAIN CONTENT STYLES
+   =========================================== */
+.main-content {
+  margin-top: 120px;
+  padding: 40px 5%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.tutorial-title {
+  font-family: 'Biryani', sans-serif;
+  font-size: 48px;
+  font-weight: 800;
+  text-align: center;
+  color: #333;
+  margin-bottom: 60px;
+  letter-spacing: 2px;
+}
+
+/* ===========================================
+   TUTORIAL STEPS STYLES
+   =========================================== */
+.tutorial-steps {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  width: 100%;
+  max-width: 900px;
+  background-color: #FAFAFA;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.step:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.step:nth-child(even) {
+  flex-direction: row-reverse;
+}
+
+.step-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.step-button {
+  background: linear-gradient(135deg, #8B7A56, #A08B6B);
+  color: white;
+  padding: 20px 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(139, 122, 86, 0.3);
+  transition: transform 0.3s ease;
+}
+
+.step-button:hover {
+  transform: scale(1.02);
+}
+
+.step-button h3 {
+  font-family: 'Raleway', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+.step-image {
+  flex: 1;
+  height: 200px;
+  background-color: #F5F5F5;
+  border: 2px dashed #8B7A56;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.step-image.placeholder {
+  background: linear-gradient(45deg, #F8F8F8, #EFEFEF);
+}
+
+.step-image div {
+  text-align: center;
+  color: #666;
+  padding: 20px;
+}
+
+.step-image div p:first-child {
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: #8B7A56;
+}
+
+.step-image div p:last-child {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* ===========================================
+   ICON STYLES
+   =========================================== */
+.arrow-icon,
+.edit-icon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #8B7A56, #A08B6B);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(139, 122, 86, 0.3);
+  animation: pulse 2s infinite;
+}
+
+.arrow-icon svg,
+.edit-icon svg {
+  width: 30px;
+  height: 30px;
+  fill: white;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* ===========================================
+   FOOTER STYLES
+   =========================================== */
+.footer {
+  background-color: #8B7A56;
+  color: #FFFFFF;
+  padding: 30px 0;
+  margin-top: 80px;
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.contact-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.left-column,
+.right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.left-column div,
+.right-column div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  transition: color 0.3s ease;
+}
+
+.left-column div:hover,
+.right-column div:hover {
+  color: #D4C4A8;
+  cursor: pointer;
+}
+
+.footer-bottom {
+  text-align: center;
+  margin-top: 10px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.footer-bottom p {
+  margin: 0;
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+
+/* ===========================================
+   RESPONSIVE DESIGN
+   =========================================== */
+@media screen and (max-width: 1024px) {
+  .navbar {
+    padding: 0 3%;
+  }
+  
+  .main-content {
+    padding: 40px 3%;
+  }
+  
+  .tutorial-title {
+    font-size: 40px;
+  }
+  
+  .step {
+    gap: 30px;
+    padding: 25px;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .nav-links {
+    gap: 50px;
+  }
+  
+  .navbar {
+    padding: 0 5%;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .navbar {
+    height: 80px;
+    padding: 0 20px;
+  }
+  
+  .logo {
+    width: 70px;
+    height: 70px;
+    top: 15px;
+  }
+  
+  .nav-links {
+    display: none;
+  }
+  
+  .hamburger {
+    display: flex;
+  }
+  
+  .mobile-menu {
+    display: block;
+    top: 80px;
+  }
+  
+  .main-content {
+    margin-top: 100px;
+    padding: 30px 20px;
+  }
+  
+  .tutorial-title {
+    font-size: 32px;
+    margin-bottom: 40px;
+  }
+  
+  .step {
+    flex-direction: column !important;
+    gap: 25px;
+    padding: 20px;
+  }
+  
+  .step:nth-child(even) {
+    flex-direction: column !important;
+  }
+  
+  .step-image {
+    width: 100%;
+    height: 150px;
+  }
+  
+  .step-button h3 {
+    font-size: 16px;
+  }
+  
+  .arrow-icon,
+  .edit-icon {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .arrow-icon svg,
+  .edit-icon svg {
+    width: 25px;
+    height: 25px;
+  }
+  
+  .contact-container {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .left-column,
+  .right-column {
+    gap: 12px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .navbar {
+    padding: 0 15px;
+    height: 70px;
+  }
+  
+  .logo {
+    width: 60px;
+    height: 60px;
+    top: 10px;
+    margin-top: 0;
+  }
+  
+  .mobile-menu {
+    top: 70px;
+  }
+  
+  .main-content {
+    padding: 20px 15px;
+  }
+  
+  .tutorial-title {
+    font-size: 28px;
+    letter-spacing: 1px;
+  }
+  
+  .step {
+    padding: 15px;
+    gap: 20px;
+  }
+  
+  .step-button {
+    padding: 15px 20px;
+  }
+  
+  .step-button h3 {
+    font-size: 14px;
+  }
+  
+  .step-image {
+    height: 120px;
+  }
+  
+  .step-image div p:first-child {
+    font-size: 14px;
+  }
+  
+  .step-image div p:last-child {
+    font-size: 12px;
+  }
+  
+  .footer {
+    padding: 20px 0;
+  }
+  
+  .left-column div,
+  .right-column div {
+    font-size: 12px;
+  }
+}
